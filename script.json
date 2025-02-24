@@ -1,0 +1,53 @@
+document.getElementById('processDocx').addEventListener('click', async () => {
+    const fileInput = document.getElementById('uploadDocx');
+    if (fileInput.files.length === 0) {
+        alert("Please upload a .docx file.");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = async function(event) {
+        try {
+            const zip = new JSZip();
+            await zip.loadAsync(event.target.result);
+
+            if (!zip.file("word/comments.xml")) {
+                alert("No comments found in the document.");
+                return;
+            }
+
+            const commentsXml = await zip.file("word/comments.xml").async("string");
+            let commentsJson = xmljs.xml2js(commentsXml, { compact: true });
+
+            if (commentsJson["w:comments"] && commentsJson["w:comments"]["w:comment"]) {
+                let comments = commentsJson["w:comments"]["w:comment"];
+                if (!Array.isArray(comments)) comments = [comments];
+
+                comments.forEach(comment => {
+                    if (comment._attributes && comment._attributes["w:date"]) {
+                        delete comment._attributes["w:date"];
+                    }
+                });
+
+                const updatedXml = xmljs.js2xml(commentsJson, { compact: true, spaces: 4 });
+                zip.file("word/comments.xml", updatedXml);
+            }
+
+            const cleanedBlob = await zip.generateAsync({ type: "blob" });
+            const url = URL.createObjectURL(cleanedBlob);
+
+            const downloadLink = document.getElementById('downloadLink');
+            downloadLink.href = url;
+            downloadLink.download = "cleaned_" + file.name;
+            downloadLink.style.display = "block";
+            downloadLink.textContent = "Download Cleaned DOCX";
+        } catch (error) {
+            console.error("Error processing file:", error);
+            alert("Failed to process the document.");
+        }
+    };
+
+    reader.readAsArrayBuffer(file);
+});

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOCX Comment Date Remover</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xml-js/1.6.11/xml-js.min.js"></script>
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <h2>Remove Timestamps from DOCX Comments</h2>
+    <input type="file" id="uploadDocx" accept=".docx">
+    <button id="processDocx">Process File</button>
+    <a id="downloadLink" style="display: none;">Download Cleaned DOCX</a>
+</body>
+</html>
